@@ -1,6 +1,8 @@
 // Import and Dependencies
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
+const { authLimit } = require('./middleware/rateLimiter');
 require('dotenv').Config();
 
 
