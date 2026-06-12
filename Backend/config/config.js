@@ -28,7 +28,7 @@ module.exports = {
         db_user : envVars.DB_USER,
         db_pass : envVars.DB_PASSWORD,
         db_host : envVars.DB_HOST,
-        db_password : envVars.DB_PASSWORD,
+        db_name: envVars.DB_NAME,
         db_port : envVars.DB_PORT
     },
     jwt : {
