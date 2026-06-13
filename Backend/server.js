@@ -3,7 +3,8 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const { authLimit } = require('./middleware/rateLimiter');
-require('dotenv').Config();
+const userRouter = require('./routes/userRoutes')
+require('dotenv').config();
 
 
 const app = express();
@@ -14,15 +15,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended : true}));
 
 app.get("/",(req,res) => {
-    res.status(200).json({ message : "Welcome to the Express server API!"})
+    return res.status(200).json({ message : "Welcome to the Express server API!"})
 })
+
+app.use("/users", userRouter
+)
 
 
 app.use((err, req, res, next) => {
     console.error(err.stack);
-    res.status(500).json({error : "Something went wrong on the Server"})
+    return res.status(500).json({error : "Something went wrong on the Server"})
 })
 
-app.listen(PORT, () => {
-    console.log(`Server is running smoothly on the Port : ${PORT}`);
+app.listen(port, () => {
+    console.log(`Server is running smoothly on the Port : ${port}`);
+    console.log(`👉 Click here to open: http://localhost:${port}`)
 })

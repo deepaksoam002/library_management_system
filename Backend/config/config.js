@@ -1,30 +1,37 @@
-const dotenv = require('dotenv');
+const dotenv = require('dotenv');  // this line only loads the environment variables from the .env file into process.env
+dotenv.config() // this line loads the environment variables from the .env file into process.env
 const path = require('path');
 const Joi = require('joi');
 
 
 const schema = Joi.object().
 keys({
-    NODE_ENV : Joi.string().valid('production','devlopment','test').required(),
+    NODE_ENV : Joi.string().valid('production','development','test').required(),
     PORT : Joi.number().default(5000),
-    DB_USER :  Joi.string().required().description("PostgreSQL username!!"),
-    DB_PASSWORD : Joi.string().required().description("Postgre password"),
-    DB_HOST : Joi.string().required().description('PostgreSQL Host Name'),
-    DB_NAME : Joi.string().required().description('PostgreSQL name'),
+    DB_USER :  Joi.string().description("PostgreSQL username!!"),
+    DB_PASSWORD : Joi.string().description("Postgre password"),
+    DB_HOST : Joi.string().description('PostgreSQL Host Name'),
+    DB_NAME : Joi.string().description('PostgreSQL name'),
     DB_PORT : Joi.number().default(5432),
+    DB_URL : Joi.string().description('PostgreSQL connection string'), // required  if using neon database
     JWT_SECRET : Joi.string().required().description('JWT Secret Key')
-}).unknown();
+}).xor('DB_URL','DB_USER')
+.and('DB_USER','DB_PASSWORD','DB_HOST','DB_NAME').without('DB_URL',['DB_USER', 'DB_PASSWORD', 'DB_HOST', 'DB_NAME']).unknown();
 
-const {value : envVars, error} = schema.prefs({error : { lable : key}}).validate(process.env)
+
+
+
+const {value : envVars, error} = schema.prefs({errors : { label : 'key'}}).validate(process.env)
 
 if(error){
-    throw new Error(`Config Validation Error : $(error.message)`)
+    throw new Error(`Config validation error : ${error.message}`)
 };
 
 module.exports = {
     env : envVars.NODE_ENV,
     port : envVars.PORT,
     db : {
+        db_url : envVars.DB_URL,
         db_user : envVars.DB_USER,
         db_pass : envVars.DB_PASSWORD,
         db_host : envVars.DB_HOST,
