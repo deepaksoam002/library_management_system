@@ -12,6 +12,7 @@
   "type": "commonjs",
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
+    "bcrypt": "^6.0.0",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
@@ -20,6 +21,7 @@
     "joi": "^18.2.1",
     "morgan": "^1.11.0",
     "nodemon": "^3.1.14",
+    "pg": "^8.21.0",
     "winston": "^3.19.0"
   }
 }
