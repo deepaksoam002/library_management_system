@@ -25,53 +25,54 @@ async function handlePasswordComparison(password, hashed_Password){
 
 }
 
-async function generateAccessToken(user){
+ function generateAccessToken(user){
+
 
     const payload = {
         id : user.id,
         email : user.email,
         role : user.role
     };
-
-    const options = {
-        httpOnly : true,
-        secure : true,
-        sameSite : 'strict',
-    }
+    
+    const jwtOptions = {
+        expiresIn: config.jwt.expiresIn // This must live inside an object!
+    };
+    
 
     try{
-        const accessToken = await jwt.sign(payload,config.jwt.secret, config.jwt.expiresIn, options)
+        const accessToken =  jwt.sign(payload, config.jwt.secret, jwtOptions)
+
+
         return accessToken;
     }catch(error){
-        throw new Error('Error occurred while generating access token!!');
+        throw new Error(`Error occurred while generating access token!! : ${error}`);
     }
 }
 
-async function generateRefreshToken(user){
+ function generateRefreshToken(user){
     const payload = {
         id : user.id,
         role : user.role
     };
 
     const options ={
-        httpOnly : true,
-        secure : true,
-        sameSite : 'strict',
-        expriresIn : '30d',
+         expiresIn : '30d',
     }
 
     try{
-    const refreshToken = await jwt.sign(payload,config.jwt.refreshSecret, options);
+
+    const refreshToken =  jwt.sign(payload, config.jwt.refreshSecret, options);
     return refreshToken;
+
     } catch(error){
-        throw new Error('Error occurred while generating refresh token!!');
+        throw new Error(`Error occurred while generating refresh token!! : ${error}`);
     }
 }
 
-async function verifyAccessToken(accessToken){
+ function verifyAccessToken(accessToken){
     try{
 
-        const decoded = await jwt.verify(accessToken, config.jwt.secret);
+        const decoded =  jwt.verify(accessToken, config.jwt.secret);
         return decoded;
     }catch(error){
         if(error.name === 'TokenExpiredError'){
@@ -86,9 +87,9 @@ async function verifyAccessToken(accessToken){
     }
 }
 
-async function verifyRefreshToken(refreshToken){
+ function verifyRefreshToken(refreshToken){
     try{
-             const refreshTokenDecoded = await jwt.verify(refreshToken, config.jwt.refreshSecret);
+             const refreshTokenDecoded =  jwt.verify(refreshToken, config.jwt.refreshSecret);
              return refreshTokenDecoded;
     } catch(error){
         if(error.name === 'TokenExpiredError'){

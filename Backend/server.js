@@ -3,7 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const { authLimit } = require('./middleware/rateLimiter');
-const userRouter = require('./routes/userRoutes')
+const userRouter = require('./routes/authRoutes')
 require('dotenv').config();
 
 
@@ -18,7 +18,7 @@ app.get("/",(req,res) => {
     return res.status(200).json({ message : "Welcome to the Express server API!"})
 })
 
-app.use("/users", userRouter
+app.use("/api", userRouter
 )
 
 
