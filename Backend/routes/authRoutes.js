@@ -8,7 +8,7 @@ const {handleNewUserRegistration,
        handleUserLogout,
        handleForgotPassword,
        handleResetPassword
-     } = require('../models/newUserModel');
+     } = require('../controllers/authController');
 
 
 // Handle new user registration ---

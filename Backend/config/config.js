@@ -14,7 +14,11 @@ keys({
     DB_NAME : Joi.string().description('PostgreSQL name'),
     DB_PORT : Joi.number().default(5432),
     DB_URL : Joi.string().description('PostgreSQL connection string'), // required  if using neon database
-    JWT_SECRET : Joi.string().required().description('JWT Secret Key')
+    JWT_SECRET : Joi.string().required().description('JWT Secret Key'),
+    JWT_EXPIRESIN : Joi.string().required().description('JWT Expiration Time'),
+    JWT_REFRESH_SECRET : Joi.string().required().description('JWT Refresh Secret Key'),
+    GMAIL_USER : Joi.string().required().description('Gmail user email address'),
+    GMAIL_PASS : Joi.string().required().description('Gmail user password'),
 }).xor('DB_URL','DB_USER')
 .and('DB_USER','DB_PASSWORD','DB_HOST','DB_NAME').without('DB_URL',['DB_USER', 'DB_PASSWORD', 'DB_HOST', 'DB_NAME']).unknown();
 
@@ -39,7 +43,13 @@ module.exports = {
         db_port : envVars.DB_PORT
     },
     jwt : {
-       secret : envVars.JWT_SECRET
+       secret : envVars.JWT_SECRET,
+       refreshSecret : envVars.JWT_REFRESH_SECRET,
+       expiresIn : envVars.JWT_EXPIRESIN,
 
+    },
+    email : {
+        user : envVars.GMAIL_USER,
+        pass : envVars.GMAIL_PASS
     }
 }
