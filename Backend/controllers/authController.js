@@ -1,60 +1,13 @@
 const sql = require('../config/db');
-const path = require('path');
-const fs = require('fs/promises');
+const {saveRefreshToken,saveVerificationData} = require('../localDatabase/database');
+const sendEmail = require('../utils/mail')
 const cookies = require('cookie-parser');
 const { handlePasswordHashing,
         handlePasswordComparison, 
         generateAccessToken,
-        generateRefreshToken} = require('../utils/auth');
+        generateRefreshToken,
+        getOtp} = require('../utils/auth');
 const { json } = require('stream/consumers');
-
-
-// use database.json to store refresh key untill we do not add redis 
-async function saveRefreshToken(id, token){
-
-    let tokenData = {};
-
-    // first we get data from file then parsh in JSON then save to token if data exist  and we can add new entry and save back 
-    const filePath = path.join(__dirname, 'data', 'database.json');
-      console.log(filePath);
-    try{
-    const fileData = await fs.readFile(filePath,'utf-8')
-
-    // parsh in json 
-    tokenData = JSON.parse(fileData);
-
-    }catch(err){
-        throw new Error(`unable to read database.json file,${err}`)
-    }
-
-    // Add new data in token 
-    tokenData[id] = {
-        refreshToken : token,
-        updatedAt: new Date().toISOString()
-    }
-    
-   // add json data back to file 
-
-   try{
-
-      await fs.writeFile(filePath, JSON.stringify(tokenData, null, 2), 'utf-8')
-
-      console.log('refresh token save successfully in file')
-
-   }catch(err){
-
-    if(err.code = 'ENOENT'){
-        console.log('file not found new file creating')
-
-        await fs.writeFile(filePath, {}, 'utf-8')
-    }else {
-
-        console.log('something else wrong in refresh token saving ')
-    }
-   }
-
-}
-
 
 
 // Handle new user registration ---
@@ -72,7 +25,27 @@ async function handleNewUserRegistration(req, res){
         if(isUserExist.rows.length > 0){
           return res.status(409).json({message: 'User already exists!! Please login!!'})
         }
- 
+        
+        const otp = getOtp();
+        saveVerificationData(username, email, password, otp);
+        // genrate otp for user and send email 
+        const emailData = {
+            to        : email,
+            emailType : 'emailVerification',
+            otp       : otp,
+            name      : username,
+        }
+         const isEmailSend = sendEmail(emailData);
+
+         if (!isEmailSend){ 
+            throw new Error('Unable to send verification email');
+         };
+
+
+
+
+
+
        // Hash the password before storing it in the database  status : pending
         const hashedPassword = await handlePasswordHashing(password);
         const result = await sql.query('INSERT INTO users (name, email, password_hash, role) VALUES ($1, $2, $3, $4 ) RETURNING *', [username, email, hashedPassword, 'student']

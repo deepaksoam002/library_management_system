@@ -103,6 +103,10 @@ async function handlePasswordComparison(password, hashed_Password){
     }
 }
 
+function getOtp(){
+    const otp = Math.floor(10000 + (Math.random() * 900000));
+    return otp;
+}
 
 module.exports = {
     handlePasswordHashing,
@@ -110,5 +114,6 @@ module.exports = {
     generateAccessToken,
     generateRefreshToken,
     verifyAccessToken,
-    verifyRefreshToken
+    verifyRefreshToken,
+    getOtp,
 }

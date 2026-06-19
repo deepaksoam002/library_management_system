@@ -7,6 +7,7 @@ async function sendEmail(userData){
      
     const options = createEmail(userData);
     const info = await transporter.sendMail(options)
+    return true;
 
   }catch(error){
     throw new Error("Error : Unable to send email. Try again!!")
@@ -115,4 +116,9 @@ function passwordResetBody(newlink, resetLink){
     </div>
     
     `
-}
+};
+
+
+module.exports = sendEmail;
+
+
