@@ -1,5 +1,5 @@
 const sql = require('../config/db');
-const {saveRefreshToken,saveVerificationData} = require('../localDatabase/database');
+const {saveRefreshToken,saveVerificationData, validateOTPData} = require('../localDatabase/database');
 const sendEmail = require('../utils/mail')
 const cookies = require('cookie-parser');
 const { handlePasswordHashing,
@@ -30,10 +30,10 @@ async function handleNewUserRegistration(req, res){
         saveVerificationData(username, email, password, otp);
         // genrate otp for user and send email 
         const emailData = {
-            to        : email,
-            emailType : 'emailVerification',
-            otp       : otp,
-            name      : username,
+            to: email,
+            emailType: 'emailVerification',
+            otp: otp,
+            name: username,
         }
          const isEmailSend = sendEmail(emailData);
 
@@ -41,14 +41,45 @@ async function handleNewUserRegistration(req, res){
             throw new Error('Unable to send verification email');
          };
 
+       console.log('otp send on email to client', otp);
+       return res.status(201).json({message: 'OTP send  successfully!!'});
 
+    }
+    catch(error){
 
+        console.error('Error occurred while registering new user:', error);
+        return res.status(500).json({message: 'Internal server error!!'})
 
+ 
+    }
+};
 
+//Handle email verification --- Status : pending
+async function handleEmailVerification(req, res){
+   
+    const {email, otp} = req.body;
 
+    if(!email || !otp) {
+        throw new Error({message : "all fields are require to filled!!"})
+        return res.status(400).json({message: "All fields are require to filled!!" });
+    };
+
+    // if we have both values then we check our tempUserData.json file to validate otp 
+    try{
+
+    const userObject = await validateOTPData(email, otp);
+
+    if(!userObject){
+        throw new Error({message:"Otp Invalid !! Please enter correct OTP"});
+        return res.status(400).json({message:"Otp Invalid !! Please enter correct OTP"})
+    }
+
+    // console.log(`Otp Validated Successfully!! ${userObject.password}`)
+
+    //   const password
        // Hash the password before storing it in the database  status : pending
-        const hashedPassword = await handlePasswordHashing(password);
-        const result = await sql.query('INSERT INTO users (name, email, password_hash, role) VALUES ($1, $2, $3, $4 ) RETURNING *', [username, email, hashedPassword, 'student']
+        const hashedPassword = await handlePasswordHashing(userObject.password);
+        const result = await sql.query('INSERT INTO users (name, email, password_hash, role) VALUES ($1, $2, $3, $4 ) RETURNING *', [userObject.name, userObject.email, hashedPassword, 'student']
         );
         const data = result.rows[0];
         const userData = {
@@ -60,7 +91,7 @@ async function handleNewUserRegistration(req, res){
          const accessToken = await generateAccessToken(userData);
          const refreshToken = await generateRefreshToken(userData);
 
-         console.log(`accessToken : ${accessToken} and refreshToken : ${refreshToken}`);
+        // console.log(`accessToken : ${accessToken} and refreshToken : ${refreshToken}`);
 
          // save refresh token in database.json file
 
@@ -81,24 +112,16 @@ async function handleNewUserRegistration(req, res){
             sameSite: 'strict',
             maxAge: 30 * 24 * 60 * 60 * 1000
          });
+         
+        //  res.send("Cookie Set")
+         return res.status(201).json({ message: "New User create Successfully"})
 
 
+        }catch{
+            console.log("Internal Server Error!!")
+            return res.status(500).json({ message: "Internal Server Error!!"})
+        }
 
-       console.log('New user registered successfully!!', result.rows[0]);
-       return res.status(201).json({message: 'New User registered successfully!!', userId: result.rows[0].id});
-
-    }
-    catch(error){
-
-        console.error('Error occurred while registering new user:', error);
-        return res.status(500).json({message: 'Internal server error!!'})
-
- 
-    }
-};
-
-//Handle email verification --- Status : pending
-async function handleEmailVerification(req, res){
 
 }
 

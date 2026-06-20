@@ -3,8 +3,17 @@ const jwt = require('jsonwebtoken');
 const config = require('../config/config')
 
 async function handlePasswordHashing (password) {
+  
+    try{
+
     const hashedPassword = await bcrypt.hash(password, 10);
     return hashedPassword;
+    
+    }catch(error){
+       
+        throw new Error("something want wrong ",error)
+        
+    }
 };
 
 async function handlePasswordComparison(password, hashed_Password){

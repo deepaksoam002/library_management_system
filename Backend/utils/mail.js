@@ -4,13 +4,14 @@ const config = require('../config/config');
 
 async function sendEmail(userData){
   try{
-     
-    const options = createEmail(userData);
+       console.log( config.email.user);
+        console.log( config.email.pass);
+    const options = await createEmail(userData);
     const info = await transporter.sendMail(options)
     return true;
 
   }catch(error){
-    throw new Error("Error : Unable to send email. Try again!!")
+    throw new Error(`Error : Unable to send email. Try again!! ${error}`)
   }
 }
 
@@ -26,7 +27,7 @@ async function createEmail(mailData){
         from : config.email.user,
         to : mailData.to,
         subject : await getsubject(mailData.emailType),
-        body: await getEmailBody(mailData)
+        html: await getEmailBody(mailData)
     }
     return mailoptions; 
   } catch(error){
@@ -81,7 +82,7 @@ function emailVerificationBody(Otp, Name){
       <p style="color: #999999; font-size: 12px; text-align: center;">
         This is an automated message. Please do not reply.
       </p>
-    </div 
+    </div> 
     `
 };
 

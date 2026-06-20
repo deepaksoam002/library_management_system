@@ -66,29 +66,28 @@ async function saveVerificationData(name, email, pass, otp){
     }
     // first remove if there already a object live so we only store latest data 
 
-    
-
-
+    delete usersData[email];
     // Add new data in token 
     usersData[email] = {
         name     : name,
         email    : email,
         password : pass,
         otp      : otp,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
+        isVerified : false,
     }
     
    // add json data back to file 
 
    try{
 
-      await fs.writeFile(filePath, JSON.stringify(tokenData, null, 2), 'utf-8')
+      await fs.writeFile(filePath, JSON.stringify(usersData, null, 2), 'utf-8')
 
       console.log('refresh token save successfully in file')
 
    }catch(err){
 
-    if(err.code = 'ENOENT'){
+    if(err.code == 'ENOENT'){
         console.log('file not found new file creating')
 
         await fs.writeFile(filePath, {}, 'utf-8')
@@ -100,38 +99,47 @@ async function saveVerificationData(name, email, pass, otp){
 
 }
 
-async function verifyVerificationData(email, otp){
+async function validateOTPData(email, otp){
 
-    const filePath = path.join(__dirname,'tempUserData.json');
-    let data = {};
-    try{
-
+         const filePath = path.join(__dirname,'tempUserData.json');
          const fileData = await fs.readFile(filePath,'utf-8');
-         data = JSON.parse(fileData);
+         const data = JSON.parse(fileData);
          const userData = data[email];
-         const expireTime = 15 * 60 * 1000;
+
+         if(!userData){
+            throw new Error(`Userdata not found for this email ${email}`);
+         }
+
+         const expireTime = 5 * 60 * 1000;  // 5 min
          const totalTime  = (new Date().getTime() - new Date(userData.updatedAt).getTime());
-
          
-         if (userData.otp !== otp){
+        
+         if (userData.otp != otp){
              throw new Error("Otp mismatch ")
-             return false
-            }
+            };
 
+           
             if (totalTime > expireTime ){
                throw new Error("Otp Expired, Request for new one!!")
-               return false
+            };
+
+           
+            if(userData.isVerified !== false){
+                throw new Error("email already verified")
+              
             }
             
          if (userData.email !== email){
             throw new Error("User Data mismatch");
-         }
-
-
-    }catch(error){
-
-    }
-    return true;
+         };
+        
+         return {
+             name     : userData.name,
+             email    : userData.email,
+             password : userData.password,
+             updatedAt: new Date().toISOString(),
+        }
+        
 }
 
 async function verifyRefreshToken(id,token){
@@ -141,6 +149,6 @@ async function verifyRefreshToken(id,token){
 module.exports = {
     saveRefreshToken,
     saveVerificationData,
-    verifyVerificationData,
+    validateOTPData,
     verifyRefreshToken,
 }
