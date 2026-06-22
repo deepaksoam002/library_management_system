@@ -23,6 +23,9 @@ router.get('/verify-email/:token', handleEmailVerificationTokenValidation);
 // Handle new user signup with Google ---
 router.get('/google', handleGoogleSignup); 
 
+// Handle Google O auth  callback route
+router.get('/auth/google/callback', handleGoogleCallback)
+
 // Handle user login ---
 router.post('/login', handleUserLogin); 
 

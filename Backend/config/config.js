@@ -19,6 +19,9 @@ keys({
     JWT_REFRESH_SECRET : Joi.string().required().description('JWT Refresh Secret Key'),
     GMAIL_USER : Joi.string().required().description('Gmail user email address'),
     GMAIL_PASS: Joi.string().required().description('Gmail user password'),
+    GOOGLE_CLIENTID: Joi.string().required().description('Google auth id'),
+    GOOGLE_PASS : Joi.string().required().description('Google auth password'),
+    GOOGLE_CLIENT_SECRET : Joi.string().required().description('Google client secret'),
    
 }).xor('DB_URL','DB_USER')
 .and('DB_USER','DB_PASSWORD','DB_HOST','DB_NAME').without('DB_URL',['DB_USER', 'DB_PASSWORD', 'DB_HOST', 'DB_NAME']).unknown();
@@ -52,5 +55,10 @@ module.exports = {
     email : {
         user : envVars.GMAIL_USER,
         pass : envVars.GMAIL_PASS
+    },
+    googleauth : {
+        client : envVars.GOOGLE_CLIENTID,
+        pass : envVars.GOOGLE_PASS,
+        secret : envVars.GOOGLE_CLIENT_SECRET
     }
 }

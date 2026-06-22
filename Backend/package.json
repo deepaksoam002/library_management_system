@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "nodemon ./Backend/server.js",
-    "dev":"node ./Backend/server.js"
+    "dev": "node ./Backend/server.js"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +25,8 @@
     "morgan": "^1.11.0",
     "nodemailer": "^9.0.1",
     "nodemon": "^3.1.14",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
     "pg": "^8.21.0",
     "winston": "^3.19.0"
   }
